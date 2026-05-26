@@ -5,9 +5,12 @@ import { createClient } from "@/lib/supabase/client";
 
 type Props = {
   defaultUrl?: string | null;
+  // Bucket Supabase Storage cible (défaut : "defi-images" pour rester
+  // rétrocompatible avec les formulaires existants).
+  bucket?: string;
 };
 
-const BUCKET = "defi-images";
+const DEFAULT_BUCKET = "defi-images";
 
 function buildUniqueFilename(file: File): string {
   const cleaned = file.name
@@ -20,7 +23,8 @@ function buildUniqueFilename(file: File): string {
   return `${Date.now()}-${safe}`;
 }
 
-export default function ImageUploader({ defaultUrl }: Props) {
+export default function ImageUploader({ defaultUrl, bucket }: Props) {
+  const targetBucket = bucket ?? DEFAULT_BUCKET;
   const [imageUrl, setImageUrl] = useState<string>(defaultUrl ?? "");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +41,7 @@ export default function ImageUploader({ defaultUrl }: Props) {
       const filename = buildUniqueFilename(file);
 
       const { error: uploadError } = await supabase.storage
-        .from(BUCKET)
+        .from(targetBucket)
         .upload(filename, file, {
           contentType: file.type,
           upsert: false,
@@ -47,7 +51,9 @@ export default function ImageUploader({ defaultUrl }: Props) {
         throw uploadError;
       }
 
-      const { data } = supabase.storage.from(BUCKET).getPublicUrl(filename);
+      const { data } = supabase.storage
+        .from(targetBucket)
+        .getPublicUrl(filename);
       setImageUrl(data.publicUrl);
     } catch (e) {
       setError(

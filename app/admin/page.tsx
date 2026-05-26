@@ -1,12 +1,13 @@
 import Link from "next/link";
 import DeleteBadgeButton from "@/components/admin/DeleteBadgeButton";
+import DeleteCreationButton from "@/components/admin/DeleteCreationButton";
 import DeleteDefiButton from "@/components/admin/DeleteDefiButton";
 import DeleteSerieButton from "@/components/admin/DeleteSerieButton";
 import LogoutButton from "@/components/admin/LogoutButton";
 import { requireAdmin } from "@/lib/admin-auth";
-import { getBadges } from "@/lib/queries";
+import { getBadges, getCreations } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
-import type { Badge } from "@/lib/types";
+import type { Badge, CreationCategory } from "@/lib/types";
 
 type DefiAdminRow = {
   id: string;
@@ -43,6 +44,12 @@ const badgeConditionLabels: Record<Badge["conditionType"], string> = {
   serie_complete: "Séries complètes",
 };
 
+const creationCategoryLabels: Record<CreationCategory, string> = {
+  parafolk: "🧍 Parafolk",
+  maison: "🏠 Maison",
+  terrain: "🌳 Terrain",
+};
+
 const TH_CLASS =
   "px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wide text-ink/55";
 const TD_CLASS = "px-5 py-3.5 text-sm text-ink/80";
@@ -59,24 +66,31 @@ export default async function AdminPage() {
 
   const supabase = await createClient();
 
-  const [defisResult, seriesResult, genresResult, badges, profileResult] =
-    await Promise.all([
-      supabase
-        .from("defis")
-        .select("id, title, episode_number, difficulty, serie_id")
-        .order("episode_number", { ascending: true }),
-      supabase
-        .from("series")
-        .select("id, title, genre_id, duration, featured, created_at")
-        .order("created_at", { ascending: false }),
-      supabase.from("genres").select("id, label, position").order("position"),
-      getBadges(),
-      supabase
-        .from("profiles")
-        .select("display_name")
-        .eq("id", user.id)
-        .maybeSingle(),
-    ]);
+  const [
+    defisResult,
+    seriesResult,
+    genresResult,
+    badges,
+    creations,
+    profileResult,
+  ] = await Promise.all([
+    supabase
+      .from("defis")
+      .select("id, title, episode_number, difficulty, serie_id")
+      .order("episode_number", { ascending: true }),
+    supabase
+      .from("series")
+      .select("id, title, genre_id, duration, featured, created_at")
+      .order("created_at", { ascending: false }),
+    supabase.from("genres").select("id, label, position").order("position"),
+    getBadges(),
+    getCreations(),
+    supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", user.id)
+      .maybeSingle(),
+  ]);
 
   const queryError =
     defisResult.error ?? seriesResult.error ?? genresResult.error;
@@ -278,6 +292,85 @@ export default async function AdminPage() {
                             Modifier
                           </Link>
                           <DeleteDefiButton id={row.id} title={row.title} />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* SECTION — Mes créations */}
+        <section className="mt-8 surface-card overflow-hidden">
+          <div className="flex flex-col gap-3 border-b border-ink/[0.06] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div>
+              <h2 className="font-display text-xl font-bold text-ink">
+                Mes créations
+              </h2>
+              <p className="mt-0.5 text-xs text-ink/55">
+                {pluralize(creations.length, "création", "créations")}
+              </p>
+            </div>
+            <Link href="/admin/creations/nouveau" className="btn-primary">
+              + Nouvelle création
+            </Link>
+          </div>
+
+          {creations.length === 0 ? (
+            <p className="p-6 text-sm text-ink/55">
+              Aucune création pour l&apos;instant.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-ink/[0.025]">
+                  <tr>
+                    <th className={TH_CLASS}>Titre</th>
+                    <th className={TH_CLASS}>Catégorie</th>
+                    <th className={TH_CLASS}>Compteur</th>
+                    <th className={TH_CLASS}>À l&apos;honneur</th>
+                    <th className={`${TH_CLASS} text-right`}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {creations.map((creation) => (
+                    <tr key={creation.id} className={ROW_CLASS}>
+                      <td className={`${TD_CLASS} font-semibold text-ink`}>
+                        {creation.title}
+                      </td>
+                      <td className={TD_CLASS}>
+                        {creationCategoryLabels[creation.category]}
+                      </td>
+                      <td className={TD_CLASS}>
+                        {creation.counterLabel ?? (
+                          <span className="text-ink/35">—</span>
+                        )}
+                      </td>
+                      <td className={TD_CLASS}>
+                        {creation.featured ? (
+                          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700">
+                            Oui
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-ink/5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-ink/40">
+                            Non
+                          </span>
+                        )}
+                      </td>
+                      <td className={TD_CLASS}>
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/admin/creations/${creation.id}`}
+                            className={MODIFIER_BTN_CLASS}
+                          >
+                            Modifier
+                          </Link>
+                          <DeleteCreationButton
+                            id={creation.id}
+                            title={creation.title}
+                          />
                         </div>
                       </td>
                     </tr>

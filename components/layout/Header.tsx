@@ -43,12 +43,22 @@ export default async function Header() {
           {/* Liens publics : masqués sur mobile (un menu hamburger viendra plus tard).
               Sur < md, on garde uniquement le bouton d'auth pour éviter le débordement
               horizontal qui force le navigateur mobile à dézoomer. */}
-          <div className="hidden items-center gap-6 md:flex">
+          {/* Avec l'ajout de « Mes créations » on passe à 5 liens : on
+              attend `lg` pour les afficher tous afin d'éviter les retours
+              à la ligne sur tablettes étroites. Un menu hamburger viendra
+              plus tard pour combler le trou < lg. */}
+          <div className="hidden items-center gap-5 lg:flex">
             <Link href="/" className="transition-colors hover:text-ink">
               Accueil
             </Link>
             <Link href="/a-propos" className="transition-colors hover:text-ink">
               À propos
+            </Link>
+            <Link
+              href="/creations"
+              className="transition-colors hover:text-ink"
+            >
+              Mes créations
             </Link>
             <Link
               href="/participer"

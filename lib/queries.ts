@@ -1,5 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Badge, Defi, Genre, Serie } from "@/lib/types";
+import type {
+  Badge,
+  Creation,
+  CreationCategory,
+  Defi,
+  Genre,
+  Serie,
+} from "@/lib/types";
 
 // =====================================================================
 // GENRES
@@ -300,6 +307,96 @@ export async function getLatestDefiImageBySerie(): Promise<
     }
   }
   return result;
+}
+
+// =====================================================================
+// CREATIONS (drops Steam Workshop de Kalyra)
+// =====================================================================
+
+type CreationRow = {
+  id: string;
+  title: string;
+  slug: string;
+  category: CreationCategory;
+  description: string;
+  image_url: string | null;
+  workshop_url: string;
+  tags: string[] | null;
+  counter_label: string | null;
+  featured: boolean | null;
+  position: number | null;
+  created_at: string;
+};
+
+const CREATION_COLUMNS =
+  "id, title, slug, category, description, image_url, workshop_url, tags, counter_label, featured, position, created_at";
+
+function mapCreation(row: CreationRow): Creation {
+  return {
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    category: row.category,
+    description: row.description,
+    imageUrl: row.image_url,
+    workshopUrl: row.workshop_url,
+    tags: row.tags ?? [],
+    counterLabel: row.counter_label,
+    featured: row.featured ?? false,
+    position: row.position ?? 0,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getCreations(): Promise<Creation[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("creations")
+    .select(CREATION_COLUMNS)
+    .order("position", { ascending: true })
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[getCreations] Erreur Supabase :", error.message);
+    return [];
+  }
+  return ((data ?? []) as CreationRow[]).map(mapCreation);
+}
+
+export async function getCreationsByCategory(
+  category: CreationCategory,
+): Promise<Creation[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("creations")
+    .select(CREATION_COLUMNS)
+    .eq("category", category)
+    .order("position", { ascending: true })
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[getCreationsByCategory] Erreur Supabase :", error.message);
+    return [];
+  }
+  return ((data ?? []) as CreationRow[]).map(mapCreation);
+}
+
+export async function getCreationById(id: string): Promise<Creation | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("creations")
+    .select(CREATION_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[getCreationById] Erreur Supabase :", error.message);
+    return null;
+  }
+  return data ? mapCreation(data as CreationRow) : null;
 }
 
 // =====================================================================

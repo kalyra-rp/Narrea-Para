@@ -224,6 +224,85 @@ export async function deleteBadge(id: string): Promise<void> {
   revalidatePath("/", "layout");
 }
 
+// =====================================================================
+// CREATIONS (drops Steam Workshop)
+// =====================================================================
+
+function extractCreationFields(formData: FormData) {
+  const title = String(formData.get("title") ?? "").trim();
+  const slug = String(formData.get("slug") ?? "").trim();
+  const category = String(formData.get("category") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const imageUrlRaw = String(formData.get("image_url") ?? "").trim();
+  const workshop_url = String(formData.get("workshop_url") ?? "").trim();
+  const tags = parseLines(String(formData.get("tags") ?? ""));
+  const counterLabelRaw = String(formData.get("counter_label") ?? "").trim();
+  const featured = formData.get("featured") !== null;
+  const position = Number(formData.get("position") ?? 0);
+
+  return {
+    title,
+    slug,
+    category,
+    description,
+    image_url: imageUrlRaw.length > 0 ? imageUrlRaw : null,
+    workshop_url,
+    tags,
+    counter_label: counterLabelRaw.length > 0 ? counterLabelRaw : null,
+    featured,
+    position,
+  };
+}
+
+export async function createCreation(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const supabase = await createClient();
+  const fields = extractCreationFields(formData);
+
+  const { error } = await supabase.from("creations").insert(fields);
+  if (error) {
+    console.error("[createCreation] Erreur Supabase :", error.message);
+    throw new Error(`Création impossible : ${error.message}`);
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/admin");
+}
+
+export async function updateCreation(
+  id: string,
+  formData: FormData,
+): Promise<void> {
+  await requireAdmin();
+  const supabase = await createClient();
+  const fields = extractCreationFields(formData);
+
+  const { error } = await supabase
+    .from("creations")
+    .update(fields)
+    .eq("id", id);
+  if (error) {
+    console.error("[updateCreation] Erreur Supabase :", error.message);
+    throw new Error(`Modification impossible : ${error.message}`);
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/admin");
+}
+
+export async function deleteCreation(id: string): Promise<void> {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const { error } = await supabase.from("creations").delete().eq("id", id);
+  if (error) {
+    console.error("[deleteCreation] Erreur Supabase :", error.message);
+    throw new Error(`Suppression impossible : ${error.message}`);
+  }
+
+  revalidatePath("/", "layout");
+}
+
 // ⚠️ Supprimer une série supprime aussi tous ses défis,
 // grâce à la contrainte ON DELETE CASCADE de la FK defis.serie_id.
 // Si cette contrainte n'est pas posée côté base, la suppression

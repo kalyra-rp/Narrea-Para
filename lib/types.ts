@@ -44,3 +44,24 @@ export type Defi = {
   // URL publique vers le bucket Storage "defi-images"
   imageUrl: string | null;
 };
+
+// Les 3 catégories du Steam Workshop de Kalyra.
+export type CreationCategory = "parafolk" | "maison" | "terrain";
+
+export type Creation = {
+  id: string;
+  title: string;
+  slug: string;
+  category: CreationCategory;
+  description: string;
+  // URL publique vers le bucket Storage "creation-images"
+  imageUrl: string | null;
+  // Lien externe vers la page Steam Workshop
+  workshopUrl: string;
+  tags: string[];
+  // petit compteur affiché sur la carte, ex. "⬇️ 1.2k"
+  counterLabel: string | null;
+  featured: boolean;
+  position: number;
+  createdAt: string;
+};
