@@ -1,26 +1,174 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* =====================================================================
+   TOKENS DE DESIGN — palette, polices, animations
+   =====================================================================
+   Tous les @theme deviennent des classes Tailwind utilisables partout :
+   bg-cream, text-ink, text-build, bg-legacy/15, animate-fade-in, etc.
+*/
+@theme {
+  /* Polices */
+  --font-display: var(--font-baloo), system-ui, sans-serif;
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
+
+  /* Base */
+  --color-cream: #fff8f3;
+  --color-ink: #2a2440;
+
+  /* Accents par genre (alignés avec la base) */
+  --color-build: #ff7a85;
+  --color-legacy: #a78bfa;
+  --color-romance: #fb7185;
+  --color-story: #34d399;
+  --color-cult: #f59e0b;
+  --color-season: #fbbf24;
+  --color-cas: #60a5fa;
+
+  /* Halos d'arrière-plan (utilisables comme couleurs si besoin) */
+  --color-halo-rose: #fecdd3;
+  --color-halo-peach: #fed7aa;
+
+  /* Animations signature — génère automatiquement
+     les utilitaires animate-fade-in / animate-rise-in */
+  --animate-fade-in: fade-in 400ms ease-out both;
+  --animate-rise-in: rise-in 450ms ease-out both;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
+/* =====================================================================
+   FOND GLOBAL — crème chaud + halos rosés/pêche en haut de page
+   =====================================================================
+   Les halos vivent dans un div .halo-bg posé en haut de body via
+   position: absolute, donc ils défilent avec la page (disparaissent
+   au scroll). Le z-index -1 les place derrière tout le contenu.
+   Une lente pulsation d'opacité ajoute du vivant sans clignotement.
+*/
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #fff8f3;
+}
+
+.halo-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 720px;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(
+      ellipse 70% 45% at 12% 0%,
+      rgba(254, 205, 211, 0.6) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 60% 45% at 88% 0%,
+      rgba(254, 215, 170, 0.55) 0%,
+      transparent 65%
+    );
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  animation: halo-pulse 12s ease-in-out infinite;
+}
+
+@keyframes halo-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+@keyframes xp-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* =====================================================================
+   COMPOSANTS RÉUTILISABLES — boutons et surfaces du design system
+   =====================================================================
+   À privilégier dans tout le site (Hero, formulaires, CTA, etc.)
+   pour garantir une cohérence visuelle.
+*/
+@layer components {
+  /* CTA primaire : dégradé signature rose → violet, ombre douce colorée */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold text-white transition;
+    background-image: linear-gradient(135deg, #ff6a88, #a18cd1);
+    box-shadow: 0 6px 18px rgba(255, 106, 136, 0.28);
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 10px 24px rgba(255, 106, 136, 0.38);
+    filter: brightness(1.05);
+  }
+  .btn-primary:active {
+    transform: translateY(0) scale(0.99);
+  }
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    filter: none;
+  }
+  .btn-primary:focus-visible {
+    outline: 2px solid #a18cd1;
+    outline-offset: 3px;
+  }
+
+  /* CTA secondaire : blanc, bordure très douce */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-full border border-ink/15 bg-white px-5 py-2.5 text-sm font-semibold text-ink shadow-sm transition;
+  }
+  .btn-secondary:hover {
+    @apply shadow-md;
+    transform: translateY(-1px);
+  }
+  .btn-secondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn-secondary:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  /* Surface "carte" standard : fond blanc, bordure douce, ombre légère */
+  .surface-card {
+    @apply rounded-2xl border border-ink/10 bg-white shadow-sm;
+  }
+}
+
+/* Masque la barre de scroll sur les carrousels horizontaux,
+   tout en gardant la scrollabilité tactile. */
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
