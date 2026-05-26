@@ -34,9 +34,9 @@ const steps = [
   },
   {
     emoji: "🏅",
-    title: "Bientôt…",
+    title: "Progresse",
     body:
-      "Crée ton profil, enregistre tes défis favoris, coche tes épisodes terminés et gagne des badges. La progression arrive très vite !",
+      "Crée ton profil Narrea, enregistre tes défis favoris, coche tes épisodes terminés et gagne des badges au fil de ta progression. Ta prochaine aventure commence ici ! 🏅",
   },
 ];
 

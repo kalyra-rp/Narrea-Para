@@ -39,31 +39,30 @@ export default async function Header() {
           />
         </Link>
 
-        <nav className="flex items-center gap-6 text-sm font-medium text-ink/75">
-          <Link
-            href="/"
-            className="transition-colors hover:text-ink"
-          >
-            Accueil
-          </Link>
-          <Link
-            href="/a-propos"
-            className="transition-colors hover:text-ink"
-          >
-            À propos
-          </Link>
-          <Link
-            href="/participer"
-            className="transition-colors hover:text-ink"
-          >
-            Comment participer
-          </Link>
-          <Link
-            href="/instagram"
-            className="transition-colors hover:text-ink"
-          >
-            Instagram
-          </Link>
+        <nav className="flex items-center gap-3 text-sm font-medium text-ink/75 sm:gap-6">
+          {/* Liens publics : masqués sur mobile (un menu hamburger viendra plus tard).
+              Sur < md, on garde uniquement le bouton d'auth pour éviter le débordement
+              horizontal qui force le navigateur mobile à dézoomer. */}
+          <div className="hidden items-center gap-6 md:flex">
+            <Link href="/" className="transition-colors hover:text-ink">
+              Accueil
+            </Link>
+            <Link href="/a-propos" className="transition-colors hover:text-ink">
+              À propos
+            </Link>
+            <Link
+              href="/participer"
+              className="transition-colors hover:text-ink"
+            >
+              Comment participer
+            </Link>
+            <Link
+              href="/instagram"
+              className="transition-colors hover:text-ink"
+            >
+              Instagram
+            </Link>
+          </div>
 
           {user && displayName ? (
             <UserMenu displayName={displayName} isAdmin={isAdmin} />

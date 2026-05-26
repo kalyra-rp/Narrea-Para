@@ -67,7 +67,9 @@ export default function UserMenu({ displayName, isAdmin }: Props) {
         >
           {initial}
         </span>
-        <span className="max-w-[10rem] truncate">{displayName}</span>
+        <span className="hidden max-w-[10rem] truncate sm:inline">
+          {displayName}
+        </span>
         <span aria-hidden="true" className="text-white/80">
           ⌄
         </span>
