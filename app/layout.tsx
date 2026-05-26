@@ -84,10 +84,11 @@ export const metadata: Metadata = {
 
 // L'export viewport (séparé de metadata dans les versions récentes de
 // Next.js) pilote la couleur de la barre d'état mobile et le zoom.
+// On ne fige PAS maximumScale ni user-scalable : on laisse l'utilisateur
+// zoomer librement pour l'accessibilité.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5,
   themeColor: "#FF6A88",
 };
 
